@@ -30,6 +30,8 @@ o_image = pygame.image.load("assets/o.PNG").convert_alpha()
 o_image = pygame.transform.scale_by(o_image, 5)
 clock = pygame.time.Clock()
 turn = 'X'
+
+# Constants related to the game board
 TOTAL_WIDTH = GRID_SIZE * RECT_SIZE + (GRID_SIZE - 1) * SPACE_BETWEEN
 TOTAL_HEIGHT = GRID_SIZE * RECT_SIZE + (GRID_SIZE - 1) * SPACE_BETWEEN
 START_X = (screen.get_width() - TOTAL_WIDTH) // 2 + HORIZONTAL_OFFSET
@@ -70,6 +72,49 @@ def check_game_state(board, start_x, start_y, turn):
     return "ongoing"
 
 
+def minimax(board, depth, maximizing_player):
+    game_state = check_game_state(board, START_X, START_Y, turn)
+
+    if game_state != "ongoing":
+        if game_state == "win":
+            return 1 if maximizing_player else -1
+        elif game_state == "draw":
+            return 0
+
+    if maximizing_player:
+        max_value = float("-inf")
+        for position in board:
+            if board[position] == "":
+                board[position] = "O"
+                eval = minimax(board, depth + 1, False)
+                board[position] = ""
+                max_value = max(max_value, eval)
+        return max_value
+    else:
+        min_value = float("inf")
+        for position in board:
+            if board[position] == "":
+                board[position] = "X"
+                eval = minimax(board, depth + 1, True)
+                board[position] = ""
+                min_value = min(min_value, eval)
+        return min_value
+
+
+def find_best_move(board):
+    best_value = float("-inf")
+    best_move = None
+    for position in board:
+        if board[position] == "":
+            board[position] = "O"
+            move_value = minimax(board, 0, False)
+            board[position] = ""  # Undo the move
+            if move_value > best_value:
+                best_move = position
+                best_value = move_value
+    return best_move
+
+
 board = create_board(START_X, START_Y)
 
 screen.blit(grid, (0, 0))
@@ -101,11 +146,27 @@ while running:
                             board[position] = "O"
                         # Check game state
                         game_state = check_game_state(board, START_X, START_Y, turn)
-                        if not game_state == "ongoing":
-                            print(f"{turn} win!")
+                        if game_state != "ongoing":
+                            print(f"{turn} wins!" if game_state == "win" else "It's a draw!")
                             running = False  # or take other actions based on game state
-                        turn = switch_turn()
+                        else:
+                            turn = switch_turn()
 
+                        if turn == "O" and check_game_state(board, START_X, START_Y, turn) == "ongoing":
+                            ai_move = find_best_move(board)
+                            if ai_move:
+                                board[ai_move] = "O"
+                                ai_rect = pygame.Rect(ai_move[0], ai_move[1], RECT_SIZE, RECT_SIZE)
+                                screen.blit(o_image, ai_rect)
+                                pygame.display.flip()
+
+                                # Check game state after AI's move
+                                game_state = check_game_state(board, START_X, START_Y, turn)
+                                if game_state != "ongoing":
+                                    print(f"{turn} wins!" if game_state == "win" else "It's a draw!")
+                                    running = False
+                                else:
+                                    turn = switch_turn()
 
     pygame.display.flip()
     clock.tick(FPS)
