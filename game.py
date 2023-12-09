@@ -9,8 +9,8 @@ from pygame.locals import (
     QUIT,
 )
 
+from sprite import Sprite
 from button import Button
-
 
 class TicTacToe:
     def __init__(self):
@@ -34,20 +34,24 @@ class TicTacToe:
         self.start_menu = pygame.transform.scale_by(self.start_menu, 5)
         self.grid = pygame.image.load("assets/grid.PNG").convert()
         self.grid = pygame.transform.scale_by(self.grid, 5)
-        self.x_image = pygame.image.load("assets/x.PNG").convert_alpha()
-        self.x_image = pygame.transform.scale_by(self.x_image, 5)
-        self.o_image = pygame.image.load("assets/o.PNG").convert_alpha()
-        self.o_image = pygame.transform.scale_by(self.o_image, 5)
+        self.x_image = Sprite("assets/x.PNG", 5)
+        self.o_image = Sprite("assets/o.PNG", 5)
         self.play_button_image = pygame.image.load("assets/play_button.PNG").convert_alpha()
         self.play_button_image = pygame.transform.scale_by(self.play_button_image, 5)
         self.quit_button_image = pygame.image.load("assets/quit_button.PNG").convert_alpha()
         self.quit_button_image = pygame.transform.scale_by(self.quit_button_image, 5)
+        self.x_turn_image = Sprite("assets/x_turn.PNG", 5)
+        self.o_turn_image = Sprite("assets/o_turn.PNG", 5)
         self.clock = pygame.time.Clock()
         self.turn = 'X'
 
         self.START_X = (self.screen.get_width() - self.TOTAL_WIDTH) // 2 + self.HORIZONTAL_OFFSET
         self.START_Y = (self.screen.get_height() - self.TOTAL_HEIGHT) // 2 + self.VERTICAL_OFFSET
 
+        self.turn_images_group = pygame.sprite.Group()
+        self.marks_group = pygame.sprite.Group()
+        self.all_sprites = pygame.sprite.Group()
+        self.all_sprites.add(self.turn_images_group, self.marks_group)
         self.board = self.create_board()
 
     def create_board(self):
@@ -61,6 +65,20 @@ class TicTacToe:
 
     def switch_turn(self):
         return "O" if self.turn == "X" else "X"
+
+    def display_turn(self):
+        if self.turn == "X":
+            self.turn_images_group.empty()
+            self.turn_images_group.add(self.x_turn_image)
+            self.turn_images_group.update()
+            self.x_turn_image.rect.center = (160, 120)
+        else:
+            self.turn_images_group.empty()
+            self.turn_images_group.add(self.o_turn_image)
+            self.turn_images_group.update()
+            self.o_turn_image.rect.center = (160, 120)
+
+        self.turn_images_group.draw(self.screen)
 
     def check_game_state(self):
         lines = [
@@ -118,8 +136,6 @@ class TicTacToe:
 
     def play(self):
 
-        self.screen.blit(self.grid, (0, 0))
-
         while True:
             # Input handler
             for event in pygame.event.get():
@@ -139,10 +155,14 @@ class TicTacToe:
                             rect = pygame.Rect(position[0], position[1], self.RECT_SIZE, self.RECT_SIZE)
                             if rect.collidepoint(x, y) and symbol == "":
                                 if self.turn == "X":
-                                    self.screen.blit(self.x_image, rect)
+                                    x_mark = Sprite("assets/x.PNG", 5)
+                                    x_mark.rect.topleft = rect.topleft
+                                    self.marks_group.add(x_mark)
                                     self.board[position] = "X"
                                 else:
-                                    self.screen.blit(self.o_image, rect)
+                                    o_mark = Sprite("assets/o.PNG", 5)
+                                    o_mark.rect.topleft = rect.topleft
+                                    self.marks_group.add(o_mark)
                                     self.board[position] = "O"
                                 # Check game state
                                 game_state = self.check_game_state()
@@ -152,6 +172,13 @@ class TicTacToe:
                                     sys.exit()
                                 else:
                                     self.turn = self.switch_turn()
+
+            self.marks_group.update()
+            self.all_sprites.update()
+
+            self.screen.blit(self.grid, (0, 0))
+            self.marks_group.draw(self.screen)
+            self.display_turn()
 
             pygame.display.flip()
             self.clock.tick(self.FPS)

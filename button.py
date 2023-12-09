@@ -1,5 +1,9 @@
-class Button():
+import pygame.sprite
+
+
+class Button(pygame.sprite.Sprite):
     def __init__(self, image, position):
+        super().__init__()
         self.image = image
         self.x = position[0]
         self.y = position[1]
@@ -8,7 +12,7 @@ class Button():
     def update(self, screen):
         screen.blit(self.image, self.rect)
 
-    def is_clicked(self, position):
-        if position[0] in range(self.rect.left, self.rect.right) and position[1] in range(self.rect.top, self.rect.bottom):
-            return True
-        return False
+    def is_clicked(self, mouse_position):
+        return self.rect.collidepoint(mouse_position)
+
+
