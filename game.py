@@ -50,7 +50,6 @@ class TicTacToe:
 
         self.board = self.create_board()
 
-
     def create_board(self):
         board = {}
         for row in range(self.GRID_SIZE):
