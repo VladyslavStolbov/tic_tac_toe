@@ -40,6 +40,12 @@ class TicTacToe:
         self.play_button_image = pygame.transform.scale_by(self.play_button_image, 5)
         self.quit_button_image = pygame.image.load("assets/quit_button.PNG").convert_alpha()
         self.quit_button_image = pygame.transform.scale_by(self.quit_button_image, 5)
+        self.pvp_button = pygame.image.load("assets/pvp_button.PNG").convert()
+        self.pvp_button = pygame.transform.scale_by(self.pvp_button, 5)
+        self.vs_ai_button = pygame.image.load("assets/vs_ai.PNG").convert()
+        self.vs_ai_button = pygame.transform.scale_by(self.vs_ai_button, 5)
+        self.play_window = pygame.image.load("assets/play_window.png").convert()
+        self.play_window = pygame.transform.scale_by(self.play_window, 5)
         self.x_turn_image = Sprite("assets/x_turn.PNG", 5)
         self.o_turn_image = Sprite("assets/o_turn.PNG", 5)
         self.clock = pygame.time.Clock()
@@ -112,18 +118,44 @@ class TicTacToe:
 
         while True:
 
-            mouse_x, mouse_y = pygame.mouse.get_pos()
+            mouse_position = pygame.mouse.get_pos()
 
             self.screen.blit(self.start_menu, (0, 0))
             quit_button.update(self.screen)
             play_button.update(self.screen)
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    if play_button.is_clicked((mouse_x, mouse_y)):
-                        self.play()
-                    if quit_button.is_clicked((mouse_x, mouse_y)):
+                    if play_button.is_clicked(mouse_position):
+                        self.game_mode()
+                    if quit_button.is_clicked(mouse_position):
                         pygame.quit()
                         sys.exit()
+                if event.type == KEYDOWN:
+                    if event.key == K_ESCAPE:
+                        pygame.quit()
+                        sys.exit()
+                elif event.type == QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+            pygame.display.update()
+
+    def game_mode(self):
+
+        vs_ai_button = Button(image=self.vs_ai_button, position=(162, 337))
+        pvp_button = Button(image=self.pvp_button, position=(162, 287))
+
+        while True:
+            mouse_position = pygame.mouse.get_pos()
+
+            self.screen.blit(self.play_window, (25, 210))
+            pvp_button.update(self.screen)
+            vs_ai_button.update(self.screen)
+            # Input handler
+            for event in pygame.event.get():
+                if event.type == MOUSEBUTTONDOWN:
+                    if pvp_button.is_clicked(mouse_position):
+                        self.play()
                 if event.type == KEYDOWN:
                     if event.key == K_ESCAPE:
                         pygame.quit()
