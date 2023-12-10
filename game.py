@@ -12,6 +12,7 @@ from pygame.locals import (
 from sprite import Sprite
 from button import Button
 
+
 class TicTacToe:
     def __init__(self):
         # Initialize pygame
@@ -34,20 +35,25 @@ class TicTacToe:
         self.start_menu = pygame.transform.scale_by(self.start_menu, 5)
         self.grid = pygame.image.load("assets/grid.PNG").convert()
         self.grid = pygame.transform.scale_by(self.grid, 5)
-        self.x_image = Sprite("assets/x.PNG", 5)
-        self.o_image = Sprite("assets/o.PNG", 5)
+        self.x_image = Sprite("assets/x.PNG")
+        self.o_image = Sprite("assets/o.PNG")
         self.play_button_image = pygame.image.load("assets/play_button.PNG").convert_alpha()
         self.play_button_image = pygame.transform.scale_by(self.play_button_image, 5)
         self.quit_button_image = pygame.image.load("assets/quit_button.PNG").convert_alpha()
         self.quit_button_image = pygame.transform.scale_by(self.quit_button_image, 5)
+        self.again_button = pygame.image.load("assets/again_button.png").convert()
+        self.again_button = pygame.transform.scale_by(self.again_button, 5)
         self.pvp_button = pygame.image.load("assets/pvp_button.PNG").convert()
         self.pvp_button = pygame.transform.scale_by(self.pvp_button, 5)
         self.vs_ai_button = pygame.image.load("assets/vs_ai.PNG").convert()
         self.vs_ai_button = pygame.transform.scale_by(self.vs_ai_button, 5)
         self.play_window = pygame.image.load("assets/play_window.png").convert()
         self.play_window = pygame.transform.scale_by(self.play_window, 5)
-        self.x_turn_image = Sprite("assets/x_turn.PNG", 5)
-        self.o_turn_image = Sprite("assets/o_turn.PNG", 5)
+        self.x_turn_image = Sprite("assets/x_turn.PNG")
+        self.o_turn_image = Sprite("assets/o_turn.PNG")
+        self.x_won_image = Sprite("assets/x_won.png")
+        self.o_won_image = Sprite("assets/o_won.png")
+        self.draw_image = Sprite("assets/draw.png")
         self.clock = pygame.time.Clock()
         self.turn = 'X'
 
@@ -56,6 +62,8 @@ class TicTacToe:
 
         self.turn_images_group = pygame.sprite.Group()
         self.marks_group = pygame.sprite.Group()
+        self.buttons_group = pygame.sprite.Group()
+        self.game_end_states_group = pygame.sprite.Group()
         self.all_sprites = pygame.sprite.Group()
         self.all_sprites.add(self.turn_images_group, self.marks_group)
         self.board = self.create_board()
@@ -98,7 +106,7 @@ class TicTacToe:
 
         for line in lines:
             if all(self.board[pos] == self.turn for pos in line):
-                return "win"
+                return f"{self.turn} win"
 
         if all(symbol != "" for symbol in self.board.values()):
             return "draw"
@@ -113,8 +121,8 @@ class TicTacToe:
 
     def main_menu(self):
 
-        quit_button = Button(image=self.quit_button_image, position=(162, 337))
         play_button = Button(image=self.play_button_image, position=(162, 287))
+        quit_button = Button(image=self.quit_button_image, position=(162, 337))
 
         while True:
 
@@ -142,8 +150,8 @@ class TicTacToe:
 
     def game_mode(self):
 
-        vs_ai_button = Button(image=self.vs_ai_button, position=(162, 337))
         pvp_button = Button(image=self.pvp_button, position=(162, 287))
+        vs_ai_button = Button(image=self.vs_ai_button, position=(162, 337))
 
         while True:
             mouse_position = pygame.mouse.get_pos()
@@ -166,9 +174,52 @@ class TicTacToe:
 
             pygame.display.update()
 
-    def play(self):
+    def game_end_window(self, game_state):
+
+        again_button = Button(image=self.again_button, position=(162, 287))
+        quit_button = Button(image=self.quit_button_image, position=(162, 337))
+        self.buttons_group.add(again_button, quit_button)
 
         while True:
+            mouse_position = pygame.mouse.get_pos()
+
+            self.game_end_states_group.empty()
+            if game_state == "X win":
+                self.game_end_states_group.add(self.x_won_image)
+            elif game_state == "O win":
+                self.game_end_states_group.add(self.o_won_image)
+            elif game_state == "draw":
+                self.game_end_states_group.add(self.draw_image)
+            again_button.update(self.screen)
+            quit_button.update(self.screen)
+
+            for event in pygame.event.get():
+                if again_button.is_clicked(mouse_position):
+                    self.play()
+                    self.board = self.create_board()
+                    self.marks_group.empty()
+                    self.turn = "X"
+                elif quit_button.is_clicked(mouse_position):
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == KEYDOWN:
+                    if event.key == K_ESCAPE:
+                        pygame.quit()
+                        sys.exit()
+                elif event.type == QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+            self.game_end_states_group.update()
+            self.buttons_group.update(self.screen)
+            self.game_end_states_group.draw(self.screen)
+            self.buttons_group.draw(self.screen)
+
+            pygame.display.update()
+
+    def play(self):
+        running = True
+        while running:
             # Input handler
             for event in pygame.event.get():
                 if event.type == KEYDOWN:
@@ -187,21 +238,19 @@ class TicTacToe:
                             rect = pygame.Rect(position[0], position[1], self.RECT_SIZE, self.RECT_SIZE)
                             if rect.collidepoint(x, y) and symbol == "":
                                 if self.turn == "X":
-                                    x_mark = Sprite("assets/x.PNG", 5)
+                                    x_mark = Sprite("assets/x.PNG")
                                     x_mark.rect.topleft = rect.topleft
                                     self.marks_group.add(x_mark)
                                     self.board[position] = "X"
                                 else:
-                                    o_mark = Sprite("assets/o.PNG", 5)
+                                    o_mark = Sprite("assets/o.PNG")
                                     o_mark.rect.topleft = rect.topleft
                                     self.marks_group.add(o_mark)
                                     self.board[position] = "O"
                                 # Check game state
                                 game_state = self.check_game_state()
                                 if game_state != "ongoing":
-                                    print(f"{self.turn} wins!" if game_state == "win" else "It's a draw!")
-                                    pygame.quit()
-                                    sys.exit()
+                                    self.game_end_window(game_state)
                                 else:
                                     self.turn = self.switch_turn()
 
