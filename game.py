@@ -51,9 +51,9 @@ class TicTacToe:
         self.play_window = pygame.transform.scale_by(self.play_window, 5)
         self.x_turn_image = Sprite("assets/x_turn.PNG")
         self.o_turn_image = Sprite("assets/o_turn.PNG")
-        self.x_won_image = Sprite("assets/x_won.png")
-        self.o_won_image = Sprite("assets/o_won.png")
-        self.draw_image = Sprite("assets/draw.png")
+        self.x_won_image = Sprite("assets/x_won.png", (160, 310))
+        self.o_won_image = Sprite("assets/o_won.png", (160, 310))
+        self.draw_image = Sprite("assets/draw.png", (160, 310))
         self.clock = pygame.time.Clock()
         self.turn = 'X'
 
@@ -179,8 +179,8 @@ class TicTacToe:
         again_button = Button(image=self.again_button, position=(162, 287))
         quit_button = Button(image=self.quit_button_image, position=(162, 337))
         self.buttons_group.add(again_button, quit_button)
-
-        while True:
+        running = True
+        while running:
             mouse_position = pygame.mouse.get_pos()
 
             self.game_end_states_group.empty()
@@ -194,21 +194,21 @@ class TicTacToe:
             quit_button.update(self.screen)
 
             for event in pygame.event.get():
-                if again_button.is_clicked(mouse_position):
-                    self.play()
-                    self.board = self.create_board()
-                    self.marks_group.empty()
-                    self.turn = "X"
-                elif quit_button.is_clicked(mouse_position):
-                    pygame.quit()
-                    sys.exit()
-                elif event.type == KEYDOWN:
+                if event.type == KEYDOWN:
                     if event.key == K_ESCAPE:
                         pygame.quit()
                         sys.exit()
                 elif event.type == QUIT:
                     pygame.quit()
                     sys.exit()
+                elif event.type == MOUSEBUTTONDOWN:
+                    if again_button.is_clicked(mouse_position):
+                        self.reset_game()
+                        self.play()
+                        running = False
+                    elif quit_button.is_clicked(mouse_position):
+                        pygame.quit()
+                        sys.exit()
 
             self.game_end_states_group.update()
             self.buttons_group.update(self.screen)
@@ -216,6 +216,12 @@ class TicTacToe:
             self.buttons_group.draw(self.screen)
 
             pygame.display.update()
+
+    def reset_game(self):
+        self.turn = "X"
+        self.turn_images_group.empty()
+        self.marks_group.empty()
+        self.board = self.create_board()
 
     def play(self):
         running = True
@@ -250,6 +256,7 @@ class TicTacToe:
                                 # Check game state
                                 game_state = self.check_game_state()
                                 if game_state != "ongoing":
+                                    running = False
                                     self.game_end_window(game_state)
                                 else:
                                     self.turn = self.switch_turn()
