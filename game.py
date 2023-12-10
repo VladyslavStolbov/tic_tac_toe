@@ -94,6 +94,14 @@ class TicTacToe:
 
         self.turn_images_group.draw(self.screen)
 
+    def update_display(self):
+        self.marks_group.update()
+        self.all_sprites.update()
+        self.screen.blit(self.grid, (0, 0))
+        self.marks_group.draw(self.screen)
+        self.display_turn()
+        pygame.display.flip()
+
     def check_game_state(self):
         lines = [
                     [(self.START_X + c * 95, self.START_Y + r * 95) for c in range(3)] for r in range(3)
@@ -253,6 +261,8 @@ class TicTacToe:
                                     o_mark.rect.topleft = rect.topleft
                                     self.marks_group.add(o_mark)
                                     self.board[position] = "O"
+
+                                self.update_display()
                                 # Check game state
                                 game_state = self.check_game_state()
                                 if game_state != "ongoing":
@@ -261,14 +271,7 @@ class TicTacToe:
                                 else:
                                     self.turn = self.switch_turn()
 
-            self.marks_group.update()
-            self.all_sprites.update()
-
-            self.screen.blit(self.grid, (0, 0))
-            self.marks_group.draw(self.screen)
-            self.display_turn()
-
-            pygame.display.flip()
+            self.update_display()
             self.clock.tick(self.FPS)
 
 
