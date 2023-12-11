@@ -1,13 +1,7 @@
 import sys
 
 import pygame
-from pygame.locals import (
-    KEYDOWN,
-    MOUSEBUTTONDOWN,
-    BUTTON_LEFT,
-    K_ESCAPE,
-    QUIT,
-)
+from pygame.locals import KEYDOWN, MOUSEBUTTONDOWN, BUTTON_LEFT, K_ESCAPE, QUIT
 
 from sprite import Sprite
 from button import Button
@@ -30,36 +24,26 @@ class TicTacToe:
         self.TOTAL_WIDTH = self.GRID_SIZE * self.RECT_SIZE + (self.GRID_SIZE - 1) * self.SPACE_BETWEEN
         self.TOTAL_HEIGHT = self.GRID_SIZE * self.RECT_SIZE + (self.GRID_SIZE - 1) * self.SPACE_BETWEEN
 
+        # Variables
         self.screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
         self.start_menu = pygame.image.load("assets/start_menu.PNG").convert()
         self.start_menu = pygame.transform.scale_by(self.start_menu, 5)
         self.grid = pygame.image.load("assets/grid.PNG").convert()
         self.grid = pygame.transform.scale_by(self.grid, 5)
-        self.x_image = Sprite("assets/x.PNG")
-        self.o_image = Sprite("assets/o.PNG")
-        self.play_button_image = pygame.image.load("assets/play_button.PNG").convert_alpha()
-        self.play_button_image = pygame.transform.scale_by(self.play_button_image, 5)
-        self.quit_button_image = pygame.image.load("assets/quit_button.PNG").convert_alpha()
-        self.quit_button_image = pygame.transform.scale_by(self.quit_button_image, 5)
-        self.again_button = pygame.image.load("assets/again_button.png").convert()
-        self.again_button = pygame.transform.scale_by(self.again_button, 5)
-        self.pvp_button = pygame.image.load("assets/pvp_button.PNG").convert()
-        self.pvp_button = pygame.transform.scale_by(self.pvp_button, 5)
-        self.vs_ai_button = pygame.image.load("assets/vs_ai.PNG").convert()
-        self.vs_ai_button = pygame.transform.scale_by(self.vs_ai_button, 5)
         self.play_window = pygame.image.load("assets/play_window.png").convert()
         self.play_window = pygame.transform.scale_by(self.play_window, 5)
-        self.x_turn_image = Sprite("assets/x_turn.PNG")
-        self.o_turn_image = Sprite("assets/o_turn.PNG")
-        self.x_won_image = Sprite("assets/x_won.png", (160, 310))
-        self.o_won_image = Sprite("assets/o_won.png", (160, 310))
-        self.draw_image = Sprite("assets/draw.png", (160, 310))
+        self.x_turn_sprite = Sprite("assets/x_turn.PNG", (160, 120))
+        self.o_turn_sprite = Sprite("assets/o_turn.PNG", (160, 120))
+        self.x_won_sprite = Sprite("assets/x_won.png", (160, 310))
+        self.o_won_sprite = Sprite("assets/o_won.png", (160, 310))
+        self.draw_sprite = Sprite("assets/draw.png", (160, 310))
         self.clock = pygame.time.Clock()
         self.turn = 'X'
 
         self.START_X = (self.screen.get_width() - self.TOTAL_WIDTH) // 2 + self.HORIZONTAL_OFFSET
         self.START_Y = (self.screen.get_height() - self.TOTAL_HEIGHT) // 2 + self.VERTICAL_OFFSET
-
+        
+        # Groups
         self.turn_images_group = pygame.sprite.Group()
         self.marks_group = pygame.sprite.Group()
         self.buttons_group = pygame.sprite.Group()
@@ -81,17 +65,10 @@ class TicTacToe:
         return "O" if self.turn == "X" else "X"
 
     def display_turn(self):
-        if self.turn == "X":
-            self.turn_images_group.empty()
-            self.turn_images_group.add(self.x_turn_image)
-            self.turn_images_group.update()
-            self.x_turn_image.rect.center = (160, 120)
-        else:
-            self.turn_images_group.empty()
-            self.turn_images_group.add(self.o_turn_image)
-            self.turn_images_group.update()
-            self.o_turn_image.rect.center = (160, 120)
-
+        sprite = self.x_turn_sprite if self.turn == "X" else self.o_turn_sprite
+        self.turn_images_group.empty()
+        self.turn_images_group.add(sprite)
+        self.turn_images_group.update()
         self.turn_images_group.draw(self.screen)
 
     def update_display(self):
@@ -101,6 +78,19 @@ class TicTacToe:
         self.marks_group.draw(self.screen)
         self.display_turn()
         pygame.display.flip()
+
+    def place_image(self):
+        x, y = pygame.mouse.get_pos()
+        for position, symbol in self.board.items():
+            rect = pygame.Rect(position[0], position[1], self.RECT_SIZE, self.RECT_SIZE)
+            if rect.collidepoint(x, y) and symbol == "":
+                mark = Sprite("assets/x.PNG") if self.turn == "X" else Sprite("assets/o.PNG")
+                mark.rect.topleft = rect.topleft
+                self.marks_group.add(mark)
+                self.board[position] = self.turn
+                self.update_display()
+                return True
+        return False
 
     def check_game_state(self):
         lines = [
@@ -121,16 +111,16 @@ class TicTacToe:
 
         return "ongoing"
 
-    def minimax(self):
-        pass
-
-    def find_best_move(self):
-        pass
+    def reset_game(self):
+        self.turn = "X"
+        self.turn_images_group.empty()
+        self.marks_group.empty()
+        self.board = self.create_board()
 
     def main_menu(self):
 
-        play_button = Button(image=self.play_button_image, position=(162, 287))
-        quit_button = Button(image=self.quit_button_image, position=(162, 337))
+        play_button = Button("assets/play_button.PNG", position=(162, 287))
+        quit_button = Button("assets/quit_button.PNG", position=(162, 337))
 
         while True:
 
@@ -142,24 +132,23 @@ class TicTacToe:
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if play_button.is_clicked(mouse_position):
-                        self.game_mode()
+                        self.game_mode_menu()
                     if quit_button.is_clicked(mouse_position):
                         pygame.quit()
                         sys.exit()
-                if event.type == KEYDOWN:
-                    if event.key == K_ESCAPE:
-                        pygame.quit()
-                        sys.exit()
+                if event.type == KEYDOWN and event.key == K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
                 elif event.type == QUIT:
                     pygame.quit()
                     sys.exit()
 
             pygame.display.update()
 
-    def game_mode(self):
+    def game_mode_menu(self):
 
-        pvp_button = Button(image=self.pvp_button, position=(162, 287))
-        vs_ai_button = Button(image=self.vs_ai_button, position=(162, 337))
+        pvp_button = Button("assets/pvp_button.PNG", position=(162, 287))
+        vs_ai_button = Button("assets/vs_ai_button.PNG", position=(162, 337))
 
         while True:
             mouse_position = pygame.mouse.get_pos()
@@ -171,21 +160,19 @@ class TicTacToe:
             for event in pygame.event.get():
                 if event.type == MOUSEBUTTONDOWN:
                     if pvp_button.is_clicked(mouse_position):
-                        self.play()
-                if event.type == KEYDOWN:
-                    if event.key == K_ESCAPE:
-                        pygame.quit()
-                        sys.exit()
+                        self.start_game()
+                if event.type == KEYDOWN and event.key == K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
                 elif event.type == QUIT:
                     pygame.quit()
                     sys.exit()
 
             pygame.display.update()
 
-    def game_end_window(self, game_state):
-
-        again_button = Button(image=self.again_button, position=(162, 287))
-        quit_button = Button(image=self.quit_button_image, position=(162, 337))
+    def game_end_menu(self, game_state):
+        again_button = Button("assets/again_button.png", position=(162, 287))
+        quit_button = Button("assets/quit_button.PNG", position=(162, 337))
         self.buttons_group.add(again_button, quit_button)
         running = True
         while running:
@@ -193,26 +180,26 @@ class TicTacToe:
 
             self.game_end_states_group.empty()
             if game_state == "X win":
-                self.game_end_states_group.add(self.x_won_image)
+                self.game_end_states_group.add(self.x_won_sprite)
             elif game_state == "O win":
-                self.game_end_states_group.add(self.o_won_image)
+                self.game_end_states_group.add(self.o_won_sprite)
             elif game_state == "draw":
-                self.game_end_states_group.add(self.draw_image)
+                self.game_end_states_group.add(self.draw_sprite)
+
             again_button.update(self.screen)
             quit_button.update(self.screen)
 
             for event in pygame.event.get():
-                if event.type == KEYDOWN:
-                    if event.key == K_ESCAPE:
-                        pygame.quit()
-                        sys.exit()
+                if event.type == KEYDOWN and event.key == K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
                 elif event.type == QUIT:
                     pygame.quit()
                     sys.exit()
                 elif event.type == MOUSEBUTTONDOWN:
                     if again_button.is_clicked(mouse_position):
                         self.reset_game()
-                        self.play()
+                        self.start_game()
                         running = False
                     elif quit_button.is_clicked(mouse_position):
                         pygame.quit()
@@ -225,51 +212,24 @@ class TicTacToe:
 
             pygame.display.update()
 
-    def reset_game(self):
-        self.turn = "X"
-        self.turn_images_group.empty()
-        self.marks_group.empty()
-        self.board = self.create_board()
-
-    def play(self):
+    def start_game(self):
         running = True
         while running:
             # Input handler
             for event in pygame.event.get():
-                if event.type == KEYDOWN:
-                    if event.key == K_ESCAPE:
-                        pygame.quit()
-                        sys.exit()
+                if event.type == KEYDOWN and event.key == K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
                 elif event.type == QUIT:
                     pygame.quit()
                     sys.exit()
-
-                elif event.type == MOUSEBUTTONDOWN:
-                    if event.button == BUTTON_LEFT:
-                        # Placing image and switch turn
-                        x, y = pygame.mouse.get_pos()
-                        for position, symbol in self.board.items():
-                            rect = pygame.Rect(position[0], position[1], self.RECT_SIZE, self.RECT_SIZE)
-                            if rect.collidepoint(x, y) and symbol == "":
-                                if self.turn == "X":
-                                    x_mark = Sprite("assets/x.PNG")
-                                    x_mark.rect.topleft = rect.topleft
-                                    self.marks_group.add(x_mark)
-                                    self.board[position] = "X"
-                                else:
-                                    o_mark = Sprite("assets/o.PNG")
-                                    o_mark.rect.topleft = rect.topleft
-                                    self.marks_group.add(o_mark)
-                                    self.board[position] = "O"
-
-                                self.update_display()
-                                # Check game state
-                                game_state = self.check_game_state()
-                                if game_state != "ongoing":
-                                    running = False
-                                    self.game_end_window(game_state)
-                                else:
-                                    self.turn = self.switch_turn()
+                elif event.type == MOUSEBUTTONDOWN and event.button == BUTTON_LEFT:
+                    if self.place_image():
+                        game_state = self.check_game_state()
+                        if game_state != "ongoing":
+                            running = False
+                            self.game_end_menu(game_state)
+                        self.turn = self.switch_turn()
 
             self.update_display()
             self.clock.tick(self.FPS)
