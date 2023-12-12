@@ -1,4 +1,3 @@
-import random
 import sys
 
 import pygame
@@ -6,6 +5,7 @@ from pygame.locals import KEYDOWN, MOUSEBUTTONDOWN, BUTTON_LEFT, K_ESCAPE, QUIT
 
 from sprite import Sprite
 from button import Button
+from ai import AI
 
 
 class TicTacToe:
@@ -38,12 +38,14 @@ class TicTacToe:
         self.x_won_sprite = Sprite("assets/x_won.png", (160, 310))
         self.o_won_sprite = Sprite("assets/o_won.png", (160, 310))
         self.draw_sprite = Sprite("assets/draw.png", (160, 310))
+        self.ai = AI()
+        self.game_mode = "pvp"
         self.clock = pygame.time.Clock()
         self.turn = 'X'
 
         self.START_X = (self.screen.get_width() - self.TOTAL_WIDTH) // 2 + self.HORIZONTAL_OFFSET
         self.START_Y = (self.screen.get_height() - self.TOTAL_HEIGHT) // 2 + self.VERTICAL_OFFSET
-        
+
         # Groups
         self.turn_images_group = pygame.sprite.Group()
         self.marks_group = pygame.sprite.Group()
@@ -61,6 +63,16 @@ class TicTacToe:
                 y = self.START_Y + row * (self.RECT_SIZE + self.SPACE_BETWEEN)
                 board[(x, y)] = ""
         return board
+
+    def quit_game(self):
+        pygame.quit()
+        sys.exit()
+
+    def handle_exit_input(self, event):
+        if event.type == KEYDOWN and event.key == K_ESCAPE:
+            self.quit_game()
+        elif event.type == QUIT:
+            self.quit_game()
 
     def switch_turn(self):
         return "O" if self.turn == "X" else "X"
@@ -94,31 +106,23 @@ class TicTacToe:
         return False
 
     def check_game_state(self):
-        # Define winning patterns
-        winning_patterns = [
-            # Rows and columns
-            [(self.START_X + c * 95, self.START_Y + r * 95) for c in range(3) for r in range(3)],
-            [(self.START_X + c * 95, self.START_Y + r * 95) for r in range(3) for c in range(3)],
-            # Diagonals
-            [(self.START_X + i * 95, self.START_Y + i * 95) for i in range(3)],
-            [(self.START_X + i * 95, self.START_Y + (2 - i) * 95) for i in range(3)],
-        ]
+        lines = [
+                    [(self.START_X + c * 95, self.START_Y + r * 95) for c in range(3)] for r in range(3)
+                ] + [
+                    [(self.START_X + c * 95, self.START_Y + r * 95) for r in range(3)] for c in range(3)
+                ] + [
+                    [(self.START_X + i * 95, self.START_Y + i * 95) for i in range(3)],
+                    [(self.START_X + i * 95, self.START_Y + (2 - i) * 95) for i in range(3)],
+                ]
 
-        # Check for a win or draw
-        for pattern in winning_patterns:
-            if all(self.board[pos] == self.turn for pos in pattern):
+        for line in lines:
+            if all(self.board[pos] == self.turn for pos in line):
                 return f"{self.turn} win"
 
         if all(symbol != "" for symbol in self.board.values()):
             return "draw"
 
         return "ongoing"
-
-    def ai_move(self):
-        empty_cells = [position for position, symbol in self.board.items() if symbol == ""]
-        if empty_cells:
-            return random.choice(empty_cells)
-        return None
 
     def reset_game(self):
         self.turn = "X"
@@ -139,18 +143,13 @@ class TicTacToe:
             quit_button.update(self.screen)
             play_button.update(self.screen)
             for event in pygame.event.get():
-                if event.type == pygame.MOUSEBUTTONDOWN:
+                self.handle_exit_input(event)
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == BUTTON_LEFT:
                     if play_button.is_clicked(mouse_position):
                         self.game_mode_menu()
                     if quit_button.is_clicked(mouse_position):
                         pygame.quit()
                         sys.exit()
-                if event.type == KEYDOWN and event.key == K_ESCAPE:
-                    pygame.quit()
-                    sys.exit()
-                elif event.type == QUIT:
-                    pygame.quit()
-                    sys.exit()
 
             pygame.display.update()
 
@@ -167,17 +166,14 @@ class TicTacToe:
             vs_ai_button.update(self.screen)
             # Input handler
             for event in pygame.event.get():
-                if event.type == MOUSEBUTTONDOWN:
+                self.handle_exit_input(event)
+                if event.type == MOUSEBUTTONDOWN and event.button == BUTTON_LEFT:
                     if pvp_button.is_clicked(mouse_position):
-                        self.start_game(vs_ai=False)
+                        self.game_mode = "pvp"
+                        self.start_game()
                     if vs_ai_button.is_clicked(mouse_position):
-                        pass
-                if event.type == KEYDOWN and event.key == K_ESCAPE:
-                    pygame.quit()
-                    sys.exit()
-                elif event.type == QUIT:
-                    pygame.quit()
-                    sys.exit()
+                        self.game_mode = "ai"
+                        self.start_game()
 
             pygame.display.update()
 
@@ -201,16 +197,11 @@ class TicTacToe:
             quit_button.update(self.screen)
 
             for event in pygame.event.get():
-                if event.type == KEYDOWN and event.key == K_ESCAPE:
-                    pygame.quit()
-                    sys.exit()
-                elif event.type == QUIT:
-                    pygame.quit()
-                    sys.exit()
-                elif event.type == MOUSEBUTTONDOWN:
+                self.handle_exit_input(event)
+                if event.type == MOUSEBUTTONDOWN and event.button == BUTTON_LEFT:
                     if again_button.is_clicked(mouse_position):
                         self.reset_game()
-                        self.start_game()
+                        self.main_menu()
                         running = False
                     elif quit_button.is_clicked(mouse_position):
                         pygame.quit()
@@ -223,24 +214,28 @@ class TicTacToe:
 
             pygame.display.update()
 
-    def start_game(self, vs_ai):
+    def start_game(self):
         running = True
         while running:
-            # Input handler
             for event in pygame.event.get():
-                if event.type == KEYDOWN and event.key == K_ESCAPE:
-                    pygame.quit()
-                    sys.exit()
-                elif event.type == QUIT:
-                    pygame.quit()
-                    sys.exit()
-                elif event.type == MOUSEBUTTONDOWN and event.button == BUTTON_LEFT:
+                self.handle_exit_input(event)
+                if event.type == MOUSEBUTTONDOWN and event.button == BUTTON_LEFT:
                     if self.place_image():
                         game_state = self.check_game_state()
-                        if game_state != "ongoing":
+                        if game_state != 'ongoing':
                             running = False
                             self.game_end_menu(game_state)
-                        self.turn = self.switch_turn()
+                        else:
+                            self.turn = self.switch_turn()
+
+                            if self.game_mode == 'ai' and self.turn == 'O':
+                                ai_position = self.ai.move(self.board)
+                                self.board[ai_position] = self.turn
+                                ai_mark = Sprite("assets/o.PNG")
+                                ai_mark.rect.topleft = ai_position
+                                self.marks_group.add(ai_mark)
+                                self.turn = self.switch_turn()
+                                self.update_display()
 
             self.update_display()
             self.clock.tick(self.FPS)
