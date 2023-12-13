@@ -13,6 +13,9 @@ same computer or vs AI.
 ## Demo
 
 ---
+https://github.com/VladyslavStolbov/tic_tac_toe/assets/124466211/c4ffad0f-2f69-4919-9b0a-d906da0473cc
+
+
 
 
 ## Acknowledgments
