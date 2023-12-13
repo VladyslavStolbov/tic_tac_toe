@@ -10,7 +10,7 @@ A classical Tic Tac Toe game with two modes. Players can compete with a friend o
 
 ## Demo
 
-![Demo](https://github.com/VladyslavStolbov/tic_tac_toe/assets/124466211/c4ffad0f-2f69-4919-9b0a-d906da0473cc)
+https://github.com/VladyslavStolbov/tic_tac_toe/assets/124466211/c4ffad0f-2f69-4919-9b0a-d906da0473cc
 
 ## Installation
 
