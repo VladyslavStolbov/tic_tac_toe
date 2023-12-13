@@ -8,6 +8,7 @@ from sprite import Sprite
 from button import Button
 from ai import AI
 
+# Change the current working directory to the directory of the script
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -18,6 +19,7 @@ class TicTacToe:
         # Initialize pygame
         pygame.init()
         pygame.mixer.init()
+        pygame.display.set_caption("Tic-Tac-Toe")
 
         # Constants
         self.SCREEN_WIDTH = 320
@@ -44,10 +46,11 @@ class TicTacToe:
         self.x_won_sprite = Sprite("assets/x_won.png", (160, 310))
         self.o_won_sprite = Sprite("assets/o_won.png", (160, 310))
         self.draw_sprite = Sprite("assets/draw.png", (160, 310))
+
         self.click_sound = pygame.mixer.Sound("sounds/click.wav")
         self.win_sound = pygame.mixer.Sound("sounds/win.wav")
-        self.win_sound.set_volume(0.3)
         self.lose_sound = pygame.mixer.Sound("sounds/lose.wav")
+        self.draw_sound = pygame.mixer.Sound("sounds/draw.wav")
         self.background_music = pygame.mixer.Sound("sounds/background.wav")
         self.background_music.set_volume(0.3)
         self.ai = AI()
@@ -150,6 +153,7 @@ class TicTacToe:
             self.game_end_states_group.add(self.o_won_sprite)
         elif game_state == "draw":
             self.background_music.stop()
+            self.draw_sound.play()
             self.game_end_states_group.add(self.draw_sprite)
 
     def end_game_state(self):
