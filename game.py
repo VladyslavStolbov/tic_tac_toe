@@ -1,6 +1,6 @@
 import sys
 import time
-
+import os
 import pygame
 from pygame.locals import KEYDOWN, MOUSEBUTTONDOWN, BUTTON_LEFT, K_ESCAPE, QUIT
 
@@ -8,9 +8,13 @@ from sprite import Sprite
 from button import Button
 from ai import AI
 
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
 
 class TicTacToe:
+    """A simple implementation of the Tic Tac Toe game using Pygame."""
     def __init__(self):
+        """Initialize the game."""
         # Initialize pygame
         pygame.init()
         pygame.mixer.init()
@@ -105,7 +109,8 @@ class TicTacToe:
         for position, symbol in self.board.items():
             rect = pygame.Rect(position[0], position[1], self.RECT_SIZE, self.RECT_SIZE)
             if rect.collidepoint(x, y) and symbol == "":
-                mark = Sprite("assets/x.PNG") if self.turn == "X" else Sprite("assets/o.PNG")
+                mark_type = "x" if self.turn == "X" else "o"
+                mark = Sprite(f"assets/{mark_type}.PNG")
                 mark.rect.topleft = rect.topleft
                 self.marks_group.add(mark)
                 self.board[position] = self.turn
@@ -267,18 +272,12 @@ class TicTacToe:
                                 ai_mark = Sprite("assets/o.PNG")
                                 ai_mark.rect.topleft = ai_position
                                 self.marks_group.add(ai_mark)
+                                self.update_display()
                                 game_state = self.return_game_state()
                                 if game_state != 'ongoing':
                                     running = False
                                     self.game_end_menu(game_state)
-                                else:
-                                    self.turn = self.switch_turn()
-                                    self.update_display()
+                                self.turn = self.switch_turn()
 
             self.update_display()
             self.clock.tick(self.FPS)
-
-
-if __name__ == "__main__":
-    game = TicTacToe()
-    game.main_menu()
