@@ -1,4 +1,4 @@
-# TicTacToe ❌⭕
+# TicTacToe
 
 A classical Tic Tac Toe game with two modes. Players can compete with a friend on the same computer or against AI.
 
