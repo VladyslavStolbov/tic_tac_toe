@@ -12,6 +12,11 @@ A classical Tic Tac Toe game with two modes. Players can compete with a friend o
 
 https://github.com/VladyslavStolbov/tic_tac_toe/assets/124466211/c4ffad0f-2f69-4919-9b0a-d906da0473cc
 
+## Screenshots
+![Screenshot from 2023-12-13 16-40-33](https://github.com/VladyslavStolbov/tic_tac_toe/assets/124466211/c281dda0-7d0f-47a8-8701-594293200b6b)
+![Screenshot from 2023-12-13 16-40-40](https://github.com/VladyslavStolbov/tic_tac_toe/assets/124466211/329ed6ce-5944-4cde-9d4d-a6740476f957)
+![Screenshot from 2023-12-13 16-41-08](https://github.com/VladyslavStolbov/tic_tac_toe/assets/124466211/9a101ae5-3118-48b4-be26-eac3a1c72072)
+
 ## Installation
 
 To run this project locally, follow these steps:
