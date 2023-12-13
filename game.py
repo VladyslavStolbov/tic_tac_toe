@@ -61,7 +61,7 @@ class TicTacToe:
         self.START_X = (self.screen.get_width() - self.TOTAL_WIDTH) // 2 + self.HORIZONTAL_OFFSET
         self.START_Y = (self.screen.get_height() - self.TOTAL_HEIGHT) // 2 + self.VERTICAL_OFFSET
 
-        # Groups
+        # Groups for managing sprites
         self.turn_images_group = pygame.sprite.Group()
         self.marks_group = pygame.sprite.Group()
         self.buttons_group = pygame.sprite.Group()
@@ -71,6 +71,7 @@ class TicTacToe:
         self.board = self.create_board()
 
     def create_board(self):
+        """Create the initial empty game board."""
         board = {}
         for row in range(self.GRID_SIZE):
             for column in range(self.GRID_SIZE):
@@ -80,19 +81,23 @@ class TicTacToe:
         return board
 
     def quit_game(self):
+        """Quit the game and exit."""
         pygame.quit()
         sys.exit()
 
     def handle_exit_input(self, event):
+        """Handle exit events, including keyboard and window close events."""
         if event.type == KEYDOWN and event.key == K_ESCAPE:
             self.quit_game()
         elif event.type == QUIT:
             self.quit_game()
 
     def switch_turn(self):
+        """Switch the player's turn."""
         return "O" if self.turn == "X" else "X"
 
     def display_turn(self):
+        """Display the current player's turn."""
         sprite = self.x_turn_sprite if self.turn == "X" else self.o_turn_sprite
         self.turn_images_group.empty()
         self.turn_images_group.add(sprite)
@@ -100,6 +105,7 @@ class TicTacToe:
         self.turn_images_group.draw(self.screen)
 
     def update_display(self):
+        """Update the display with the current game state."""
         self.marks_group.update()
         self.all_sprites.update()
         self.screen.blit(self.grid, (0, 0))
@@ -108,6 +114,7 @@ class TicTacToe:
         pygame.display.flip()
 
     def place_image(self):
+        """Place a player's mark on the board based on the mouse position."""
         x, y = pygame.mouse.get_pos()
         for position, symbol in self.board.items():
             rect = pygame.Rect(position[0], position[1], self.RECT_SIZE, self.RECT_SIZE)
@@ -123,6 +130,7 @@ class TicTacToe:
         return False
 
     def return_game_state(self):
+        """Determine the current game state (win, lose, draw, ongoing)."""
         lines = [
                     [(self.START_X + c * 95, self.START_Y + r * 95) for c in range(3)] for r in range(3)
                 ] + [
@@ -142,6 +150,7 @@ class TicTacToe:
         return "ongoing"
 
     def show_end_game_window(self, game_state):
+        """Display the end game window based on the game state."""
         self.game_end_states_group.empty()
         if game_state == "X win":
             self.background_music.stop()
@@ -157,6 +166,7 @@ class TicTacToe:
             self.game_end_states_group.add(self.draw_sprite)
 
     def end_game_state(self):
+        """Check if the game has ended and handle accordingly."""
         game_state = self.return_game_state()
         if game_state != 'ongoing':
             self.game_end_menu(game_state)
@@ -164,13 +174,14 @@ class TicTacToe:
         return False  # Indicate that the game is still ongoing
 
     def reset_game(self):
+        """Reset the game state for a new game."""
         self.turn = "X"
         self.turn_images_group.empty()
         self.marks_group.empty()
         self.board = self.create_board()
 
     def main_menu(self):
-
+        """Display the main menu and handle user input."""
         self.background_music.play(loops=-1)
 
         play_button = Button("assets/play_button.png", position=(162, 287))
@@ -198,7 +209,7 @@ class TicTacToe:
             pygame.display.update()
 
     def game_mode_menu(self):
-
+        """Display the game mode menu and handle user input."""
         pvp_button = Button("assets/pvp_button.png", position=(162, 287))
         vs_ai_button = Button("assets/vs_ai_button.png", position=(162, 337))
 
@@ -224,6 +235,7 @@ class TicTacToe:
             pygame.display.update()
 
     def game_end_menu(self, game_state):
+        """Display the end game menu and handle user input."""
         again_button = Button("assets/again_button.png", position=(162, 287))
         quit_button = Button("assets/quit_button.png", position=(162, 337))
         self.buttons_group.add(again_button, quit_button)
@@ -257,6 +269,7 @@ class TicTacToe:
             pygame.display.update()
 
     def start_game(self):
+        """Start the main game loop and handle player and AI moves."""
         running = True
         while running:
             for event in pygame.event.get():
