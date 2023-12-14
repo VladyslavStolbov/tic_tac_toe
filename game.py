@@ -298,3 +298,7 @@ class TicTacToe:
 
             self.update_display()
             self.clock.tick(self.FPS)
+
+    def main(self):
+        """Start the game"""
+        self.main_menu()
