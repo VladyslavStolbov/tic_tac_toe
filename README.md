@@ -62,7 +62,6 @@ To run this project locally, follow these steps:
 6. Run the code from the directory:
 
     ```bash
-    cd ..
     python3 tic_tac_toe/
     ```
 
