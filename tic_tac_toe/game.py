@@ -35,23 +35,23 @@ class TicTacToe:
 
         # Variables
         self.screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
-        self.start_menu = pygame.image.load("assets/start_menu.png").convert()
+        self.start_menu = pygame.image.load("../assets/start_menu.png").convert()
         self.start_menu = pygame.transform.scale_by(self.start_menu, 5)
-        self.grid = pygame.image.load("assets/grid.png").convert()
+        self.grid = pygame.image.load("../assets/grid.png").convert()
         self.grid = pygame.transform.scale_by(self.grid, 5)
-        self.play_window = pygame.image.load("assets/play_window.png").convert()
+        self.play_window = pygame.image.load("../assets/play_window.png").convert()
         self.play_window = pygame.transform.scale_by(self.play_window, 5)
-        self.x_turn_sprite = Sprite("assets/x_turn.png", (160, 120))
-        self.o_turn_sprite = Sprite("assets/o_turn.png", (160, 120))
-        self.x_won_sprite = Sprite("assets/x_won.png", (160, 310))
-        self.o_won_sprite = Sprite("assets/o_won.png", (160, 310))
-        self.draw_sprite = Sprite("assets/draw.png", (160, 310))
+        self.x_turn_sprite = Sprite("../assets/x_turn.png", (160, 120))
+        self.o_turn_sprite = Sprite("../assets/o_turn.png", (160, 120))
+        self.x_won_sprite = Sprite("../assets/x_won.png", (160, 310))
+        self.o_won_sprite = Sprite("../assets/o_won.png", (160, 310))
+        self.draw_sprite = Sprite("../assets/draw.png", (160, 310))
 
-        self.click_sound = pygame.mixer.Sound("sounds/click.wav")
-        self.win_sound = pygame.mixer.Sound("sounds/win.wav")
-        self.lose_sound = pygame.mixer.Sound("sounds/lose.wav")
-        self.draw_sound = pygame.mixer.Sound("sounds/draw.wav")
-        self.background_music = pygame.mixer.Sound("sounds/background.wav")
+        self.click_sound = pygame.mixer.Sound("../sounds/click.wav")
+        self.win_sound = pygame.mixer.Sound("../sounds/win.wav")
+        self.lose_sound = pygame.mixer.Sound("../sounds/lose.wav")
+        self.draw_sound = pygame.mixer.Sound("../sounds/draw.wav")
+        self.background_music = pygame.mixer.Sound("../sounds/background.wav")
         self.background_music.set_volume(0.3)
         self.ai = AI()
         self.game_mode = "pvp"
@@ -120,7 +120,7 @@ class TicTacToe:
             rect = pygame.Rect(position[0], position[1], self.RECT_SIZE, self.RECT_SIZE)
             if rect.collidepoint(x, y) and symbol == "":
                 mark_type = "x" if self.turn == "X" else "o"
-                mark = Sprite(f"assets/{mark_type}.png")
+                mark = Sprite(f"../assets/{mark_type}.png")
                 mark.rect.topleft = rect.topleft
                 self.marks_group.add(mark)
                 self.board[position] = self.turn
@@ -184,8 +184,8 @@ class TicTacToe:
         """Display the main menu and handle user input."""
         self.background_music.play(loops=-1)
 
-        play_button = Button("assets/play_button.png", position=(162, 287))
-        quit_button = Button("assets/quit_button.png", position=(162, 337))
+        play_button = Button("../assets/play_button.png", position=(162, 287))
+        quit_button = Button("../assets/quit_button.png", position=(162, 337))
 
         while True:
 
@@ -210,8 +210,8 @@ class TicTacToe:
 
     def game_mode_menu(self):
         """Display the game mode menu and handle user input."""
-        pvp_button = Button("assets/pvp_button.png", position=(162, 287))
-        vs_ai_button = Button("assets/vs_ai_button.png", position=(162, 337))
+        pvp_button = Button("../assets/pvp_button.png", position=(162, 287))
+        vs_ai_button = Button("../assets/vs_ai_button.png", position=(162, 337))
 
         while True:
             mouse_position = pygame.mouse.get_pos()
@@ -236,8 +236,8 @@ class TicTacToe:
 
     def game_end_menu(self, game_state):
         """Display the end game menu and handle user input."""
-        again_button = Button("assets/again_button.png", position=(162, 287))
-        quit_button = Button("assets/quit_button.png", position=(162, 337))
+        again_button = Button("../assets/again_button.png", position=(162, 287))
+        quit_button = Button("../assets/quit_button.png", position=(162, 337))
         self.buttons_group.add(again_button, quit_button)
         self.show_end_game_window(game_state)
         running = True
@@ -286,7 +286,7 @@ class TicTacToe:
                             if self.game_mode == 'ai' and self.turn == 'O':
                                 ai_position = self.ai.move(self.board)
                                 self.board[ai_position] = self.turn
-                                ai_mark = Sprite("assets/o.png")
+                                ai_mark = Sprite("../assets/o.png")
                                 ai_mark.rect.topleft = ai_position
                                 self.marks_group.add(ai_mark)
                                 self.update_display()
